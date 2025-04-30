@@ -111,15 +111,11 @@ class SpatialAudioApp:
         ttk.Checkbutton(self.root, text="Dynamic", variable=self.dynamic).pack()
         
         tk.Label(self.root, text="Fixed Azimuth (if Static):").pack()
-        # tk.Scale(self.root, from_=-180, to=180, variable=self.fixed_azimuth, orient="horizontal").pack()
 
         self.fixed_azimuth = tk.DoubleVar(value=0)
         azimuth_selection = circular_space.PieChartApp(self.root, label_var=self.fixed_azimuth)
-        # self.fixed_azimuth = tk.DoubleVar(value = azimuth_selection.get_selected_azimuth())
         tk.Label(self.root, textvariable=self.fixed_azimuth).pack()
         tk.Button(self.root, text="Run Simulation", command=self.run_simulation).pack()
-        self.plot_canvas = tk.Canvas(self.root, width=300, height=300, bg="white")
-        self.plot_canvas.pack()
 
     def load_audio(self):
         file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav;*.mp3")])
@@ -142,18 +138,18 @@ class SpatialAudioApp:
         
         self.trajectory = self.generate_trajectory()
         threading.Thread(target=lambda: process_audio(self.audio, self.trajectory, self.mode.get(), f"spatial_output{self.fixed_azimuth.get()}.wav")).start()
-        self.visualize_trajectory()
+        # self.visualize_trajectory()
 
-    def visualize_trajectory(self):
-        fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-        ax.plot(np.radians(self.trajectory), np.ones_like(self.trajectory), label="Trajectory")
-        ax.set_theta_zero_location("N")
-        ax.set_theta_direction(-1)
-        ax.set_title("Virtual Source Movement")
-        for name, angle in speakers.items():
-            ax.text(np.radians(angle), 1.1, name, ha='center', fontsize=10, color='red')
-        plt.legend()
-        plt.show()
+    # def visualize_trajectory(self):
+    #     fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+    #     ax.plot(np.radians(self.trajectory), np.ones_like(self.trajectory), label="Trajectory")
+    #     ax.set_theta_zero_location("N")
+    #     ax.set_theta_direction(-1)
+    #     ax.set_title("Virtual Source Movement")
+    #     for name, angle in speakers.items():
+    #         ax.text(np.radians(angle), 1.1, name, ha='center', fontsize=10, color='red')
+    #     plt.legend()
+    #     plt.show()
 
 # === RUN GUI ===
 root = tk.Tk()
