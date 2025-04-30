@@ -13,16 +13,16 @@ def vbap_2d_5_0(source_angle_deg):
     Returns gain values for [FL, C, FR, SL, SR]
     """
     # Speaker setup: angles in degrees, order matters
-    speaker_angles = [-30, 0, 30, -110, 110]
-    speaker_names = ["FL", "C", "FR", "SL", "SR"]
+    speaker_angles = [-30, 30, 0, -110, 110]
+    speaker_names = ["FL", "FR", "C", "SL", "SR"]
 
     # Define all valid speaker pairs for VBAP
     speaker_pairs = [
-        (0, 1),  # FL - C
-        (1, 2),  # C - FR
-        (0, 2),  # FL - FR
+        (0, 2),  # FL - C
+        (2, 1),  # C - FR
+        # (0, 2),  # FL - FR
         (0, 3),  # FL - SL
-        (2, 4),  # FR - SR
+        (1, 4),  # FR - SR
         (3, 4),  # SL - SR
     ]
 

@@ -6,13 +6,13 @@ def normalize(v):
     return v / norm if norm > 0 else v
 
 def vbap_2d_5_0(source_angle_deg):
-    speaker_angles = [-30, 0, 30, -110, 110]
+    speaker_angles = [-30, 30, 0, -110, 110]
     speaker_pairs = [
-        (0, 1),  # FL - C
-        (1, 2),  # C - FR
-        (0, 2),  # FL - FR
+        (0, 2),  # FL - C
+        (2, 1),  # C - FR
+        # (0, 2),  # FL - FR
         (0, 3),  # FL - SL
-        (2, 4),  # FR - SR
+        (1, 4),  # FR - SR
         (3, 4),  # SL - SR
     ]
 
