@@ -39,12 +39,12 @@ def vbap_2d_5_0(source_angle_deg):
 
     raise ValueError("No valid speaker pair found.")
 
-def spatialize_audio_dynamic(input_path, output_path, angle_func, block_size=1024):
-    mono_audio, sr = sf.read(input_path)
-    if mono_audio.ndim > 1:
-        raise ValueError("Input must be mono.")
+def spatialize_audio_dynamic(audio, sr, block_size=1024):
+    # mono_audio, sr = sf.read(input_path)
+    # if mono_audio.ndim > 1:
+    #     raise ValueError("Input must be mono.")
 
-    n_samples = len(mono_audio)
+    n_samples = len(audio)
     n_blocks = int(np.ceil(n_samples / block_size))
 
     output_audio = np.zeros((n_samples, 5))
@@ -52,26 +52,25 @@ def spatialize_audio_dynamic(input_path, output_path, angle_func, block_size=102
     for block_idx in range(n_blocks):
         start = block_idx * block_size
         end = min((block_idx + 1) * block_size, n_samples)
-        block = mono_audio[start:end]
+        block = audio[start:end]
 
         t = start / sr  # Time in seconds
-        angle = angle_func(t)
+        angle = angle_function(t)
 
         gains, _ = vbap_2d_5_0(angle)
 
         for ch in range(5):
             output_audio[start:end, ch] = block * gains[ch]
 
-    sf.write(output_path, output_audio, sr)
-    print(f"Dynamic spatialized audio written to: {output_path}")
+    return output_audio
 
 # Example usage: pan from left to right across 5 seconds
 def angle_function(t):
     return -90 + 180 * (t / 5.0)  # sweep -90° to +90° over 5 seconds
 
-spatialize_audio_dynamic(
-    input_path="project_audio.wav",
-    output_path="vbap_dynamic_5_0.wav",
-    angle_func=angle_function,
-    block_size=1024
-)
+# spatialize_audio_dynamic(
+#     input_path="project_audio.wav",
+#     output_path="vbap_dynamic_5_0.wav",
+#     angle_func=angle_function,
+#     block_size=1024
+# )

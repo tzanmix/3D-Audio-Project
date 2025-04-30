@@ -60,23 +60,21 @@ def vbap_2d_5_0(source_angle_deg):
     return best_gains, best_pair
 
 
-def spatialize_audio(input_path, output_path, source_angle_deg):
-    mono_audio, sample_rate = sf.read(input_path)
-    if mono_audio.ndim > 1:
-        raise ValueError("Input audio must be mono")
+def spatialize_audio_static(audio, source_angle_deg):
+    # mono_audio, sample_rate = sf.read(input_path)
+    # if mono_audio.ndim > 1:
+    #     raise ValueError("Input audio must be mono")
 
     gains, speaker_pair = vbap_2d_5_0(source_angle_deg)
     print(f"Gains applied: {np.round(gains, 3)} (from speakers {speaker_pair})")
 
     # Multiply mono audio by each gain
-    spatialized = np.stack([mono_audio * gain for gain in gains], axis=1)
+    spatialized = np.stack([audio * gain for gain in gains], axis=1)
+    return spatialized
 
-    # Write 5-channel WAV
-    sf.write(output_path, spatialized, sample_rate)
-    print(f"Written spatialized audio to {output_path}")
 
 # Example usage:
-spatialize_audio("project_audio.wav", "vbap_static_5_0.wav", source_angle_deg=130)
+# spatialize_audio_static("project_audio.wav", "vbap_static_5_0.wav", source_angle_deg=35)
 # # Example usage:
 # source_angle = 45  # Source at 45 degrees
 # gains, pair = vbap_2d_5_0(source_angle)

@@ -8,12 +8,14 @@ import scipy.io
 import scipy.signal
 import threading
 import circular_space
+import vbap_dynamic_5_0
+import vbap_static_5_0
 
 # === CONFIGURATION ===
 cipic_file = "hrir_final.mat"
 cipic_elevation_index = 9  # 0° elevation
-cipic_azimuths = np.array([-80, -65, -55, -45, -40, -35, -30, -25, -20, -15, -10, -5,
-                           0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 55, 65, 80])
+cipic_azimuths = np.array([-180.0, -172.65306122, -165.30612245, -157.95918367, -150.6122449, -143.26530612, -135.91836735, -128.57142857, -121.2244898, -113.87755102, -106.53061224, -99.18367347, -91.83673469, -84.48979592, -77.14285714, -69.79591837, -62.44897959, -55.10204082, -47.75510204, -40.40816327, -33.06122449, -25.71428571, -18.36734694, -11.02040816, -3.67346939, 3.67346939, 11.02040816, 18.36734694, 25.71428571, 33.06122449, 40.40816327, 47.75510204, 55.10204082, 62.44897959, 69.79591837, 77.14285714, 84.48979592, 91.83673469, 99.18367347, 106.53061224, 113.87755102, 121.2244898, 128.57142857, 135.91836735, 143.26530612, 150.6122449, 157.95918367, 165.30612245, 172.65306122, 180.0
+])
 
 speakers = {'FL': -30, 'FR': 30, 'C': 0, 'SL': -110, 'SR': 110}
 speaker_order = ['FL', 'FR', 'C', 'SL', 'SR']
@@ -41,14 +43,8 @@ def normalize_gains(gains):
     total = np.sum(gains)
     return gains / total if total > 0 else gains
 
-# === AUDIO PROCESSING ===
-def load_audio(file_path):
-    audio, sr = librosa.load(file_path, sr=sample_rate, mono=True)
-    audio = audio / np.max(np.abs(audio))  # Normalize
-    return audio, sr
 
-def process_audio(audio, trajectory, mode, output_file):
-    num_blocks = int(np.ceil(len(audio) / block_size))
+def process_audio(audio, sr, trajectory, dynamic, mode, source_angle_deg, output_file):
     
     if mode == "headphones":
         max_hrir_len = hrir_l.shape[2]
@@ -76,13 +72,10 @@ def process_audio(audio, trajectory, mode, output_file):
         output = output / np.max(np.abs(output))
     else:
         print("Processing 5.0 Surround Audio...")
-        output = np.zeros((len(audio), 5))
-        for i, az in enumerate(trajectory):
-            start, end = i * block_size, min((i + 1) * block_size, len(audio))
-            block = audio[start:end]
-            gains = normalize_gains(np.array([pan_gain(az, speakers[spk]) for spk in speaker_order]))
-            for ch in range(5):
-                output[start:end, ch] += block * gains[ch]
+        if dynamic:
+            output = vbap_dynamic_5_0.spatialize_audio_dynamic(audio, sr)
+        else:
+            output = vbap_static_5_0.spatialize_audio_static(audio, source_angle_deg)
 
     sf.write(output_file, output, sample_rate)
     print(f"Audio saved: {output_file}")
@@ -120,7 +113,8 @@ class SpatialAudioApp:
     def load_audio(self):
         file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav;*.mp3")])
         if file_path:
-            self.audio, _ = load_audio(file_path)
+            self.audio, self.sr = librosa.load(file_path, sr=sample_rate, mono=True)
+            self.audio = self.audio / np.max(np.abs(self.audio))  # Normalize
             print(f"Loaded: {file_path}")
 
     def generate_trajectory(self):
@@ -137,19 +131,10 @@ class SpatialAudioApp:
             return
         
         self.trajectory = self.generate_trajectory()
-        threading.Thread(target=lambda: process_audio(self.audio, self.trajectory, self.mode.get(), f"spatial_output{self.fixed_azimuth.get()}.wav")).start()
-        # self.visualize_trajectory()
-
-    # def visualize_trajectory(self):
-    #     fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-    #     ax.plot(np.radians(self.trajectory), np.ones_like(self.trajectory), label="Trajectory")
-    #     ax.set_theta_zero_location("N")
-    #     ax.set_theta_direction(-1)
-    #     ax.set_title("Virtual Source Movement")
-    #     for name, angle in speakers.items():
-    #         ax.text(np.radians(angle), 1.1, name, ha='center', fontsize=10, color='red')
-    #     plt.legend()
-    #     plt.show()
+        threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.trajectory, self.dynamic.get(), 
+                        self.mode.get(), self.fixed_azimuth.get(), f"spatial_output{self.fixed_azimuth.get()}.wav")).start()
+        # threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.trajectory, self.mode.get(), f"spatial_output{self.fixed_azimuth.get()}.wav")).start()
+        
 
 # === RUN GUI ===
 root = tk.Tk()
