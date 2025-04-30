@@ -1,57 +1,55 @@
 import numpy as np
 
+
 def normalize(v):
-    """Normalize a 2D vector."""
+    """Normalize a vector to unit power."""
     norm = np.linalg.norm(v)
-    if norm == 0:
-        return v
-    return v / norm
+    return v / norm if norm > 0 else v
 
-def vbap_2d(source_angle_deg, speaker_angles_deg):
-    """
-    Calculate gain coefficients for 2D VBAP.
+def vbap_2d_5_0(source_angle_deg):
+    # Speaker setup: angles in degrees, order matters
+    speaker_angles = [-30, 30, 0, -110, 110]
+    speaker_names = ["FL", "FR", "C", "SL", "SR"]
 
-    Parameters:
-    - source_angle_deg: angle of source in degrees (0° is in front, positive is counter-clockwise)
-    - speaker_angles_deg: list of two speaker angles in degrees (assumes pairwise setup)
+    # Define all valid speaker pairs for VBAP
+    speaker_pairs = [
+        (0, 2),  # FL - C
+        (2, 1),  # C - FR
+        # (0, 2),  # FL - FR
+        (0, 3),  # FL - SL
+        (1, 4),  # FR - SR
+        (3, 4),  # SL - SR
+    ]
 
-    Returns:
-    - gains: numpy array of gain coefficients [g1, g2] for each speaker
-    """
-    # Convert angles to radians
     source_angle_rad = np.radians(source_angle_deg)
-    speaker_angles_rad = np.radians(speaker_angles_deg)
-
-    # Unit vectors for speakers
-    l1 = np.array([np.cos(speaker_angles_rad[0]), np.sin(speaker_angles_rad[0])])
-    l2 = np.array([np.cos(speaker_angles_rad[1]), np.sin(speaker_angles_rad[1])])
-
-    # Speaker matrix
-    L = np.column_stack((l1, l2))
-
-    # Invert speaker matrix
-    try:
-        L_inv = np.linalg.inv(L)
-    except np.linalg.LinAlgError:
-        raise ValueError("Speaker vectors must not be collinear")
-
-    # Source direction vector
     source_vec = np.array([np.cos(source_angle_rad), np.sin(source_angle_rad)])
 
-    # Gains (un-normalized)
-    gains = np.dot(L_inv, source_vec)
+    best_gains = None
+    best_pair = None
 
-    # Zero negative gains (outside triangle)
-    gains[gains < 0] = 0
+    for i, j in speaker_pairs:
+        # Create matrix from the two speaker direction vectors
+        v1 = np.array([np.cos(np.radians(speaker_angles[i])), np.sin(np.radians(speaker_angles[i]))])
+        v2 = np.array([np.cos(np.radians(speaker_angles[j])), np.sin(np.radians(speaker_angles[j]))])
+        L = np.column_stack((v1, v2))
 
-    # Normalize gains to unit power
-    gains = normalize(gains)
+        try:
+            L_inv = np.linalg.inv(L)
+        except np.linalg.LinAlgError:
+            continue  # Skip collinear or invalid pairs
 
-    return gains
+        gains_pair = np.dot(L_inv, source_vec)
 
-# Example usage:
-speaker_angles = [-30, 30]  # Two speakers at -30° and +30°
-source_angle = 10           # Source is at 10°
-gains = vbap_2d(source_angle, speaker_angles)
+        if np.all(gains_pair >= 0):  # Valid pair found
+            gains_pair = normalize(gains_pair)
+            gains_full = np.zeros(len(speaker_angles))
+            gains_full[i] = gains_pair[0]
+            gains_full[j] = gains_pair[1]
+            best_gains = gains_full
+            best_pair = (speaker_names[i], speaker_names[j])
+            break  # Stop at first valid pair (could refine to closest match)
 
-print(f"Gains for speakers at {speaker_angles}° with source at {source_angle}°: {gains}")
+    if best_gains is None:
+        raise ValueError("No suitable speaker pair found for the given source direction")
+
+    return best_gains, best_pair
