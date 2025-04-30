@@ -1,0 +1,13 @@
+*.wav
+*.mp3
+dynamic_5_0_CIPIC.py
+dynamic_5_0.py
+static_5_0.py
+test_dynamic.py
+test_final_step.py
+test_static.py
+test.py
+vbap_test.py
+results
+results_dynamic
+__pycache__
