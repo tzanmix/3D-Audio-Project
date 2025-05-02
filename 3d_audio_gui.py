@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import soundfile as sf
 import matplotlib.pyplot as plt
@@ -5,9 +6,10 @@ import librosa
 import tkinter as tk
 from tkinter import filedialog, ttk
 import scipy.io
-import scipy.signal
 import threading
 import circular_space
+import dynamic_binaural
+import static_binaural
 import vbap_dynamic_5_0
 import vbap_static_5_0
 
@@ -30,46 +32,15 @@ hrir_r = cipic_data['hrir_r']
 def find_closest_azimuth(deg):
     return np.argmin(np.abs(cipic_azimuths - deg))
 
-# === PAN GAIN FOR LOUDSPEAKERS ===
-def angle_diff(a, b):
-    d = abs(a - b)
-    return min(d, 360 - d)
-
-def pan_gain(source_angle, speaker_angle):
-    diff = angle_diff(source_angle, speaker_angle)
-    return max(0, 1 - (diff / 90))
-
-def normalize_gains(gains):
-    total = np.sum(gains)
-    return gains / total if total > 0 else gains
-
 
 def process_audio(audio, sr, trajectory, dynamic, mode, source_angle_deg, output_file):
-    
+    if not os.path.exists(output_file):
+        os.makedirs(output_file)
     if mode == "headphones":
-        max_hrir_len = hrir_l.shape[2]
-        out_len = len(audio) + max_hrir_len - 1
-        out_l = np.zeros(out_len)
-        out_r = np.zeros(out_len)
-
-        for i, az in enumerate(trajectory):
-            start, end = i * block_size, min((i + 1) * block_size, len(audio))
-            block = audio[start:end]
-            if len(block) < block_size:
-                block = np.pad(block, (0, block_size - len(block)))
-            az_idx = find_closest_azimuth(az)
-            h_l = hrir_l[az_idx, cipic_elevation_index, :]
-            h_r = hrir_r[az_idx, cipic_elevation_index, :]
-
-            c_l = scipy.signal.fftconvolve(block, h_l)
-            c_r = scipy.signal.fftconvolve(block, h_r)
-
-            write_len = min(len(c_l), len(out_l) - start)
-            out_l[start:start+write_len] += c_l[:write_len]
-            out_r[start:start+write_len] += c_r[:write_len]
-
-        output = np.stack([out_l, out_r], axis=1)
-        output = output / np.max(np.abs(output))
+        if dynamic:
+            output = dynamic_binaural.spatialize_audio_dynamic(audio, sr)
+        else:
+            output = static_binaural.spatialize_audio_static(audio, sr, source_angle_deg)
     else:
         print("Processing 5.0 Surround Audio...")
         if dynamic:
@@ -77,8 +48,8 @@ def process_audio(audio, sr, trajectory, dynamic, mode, source_angle_deg, output
         else:
             output = vbap_static_5_0.spatialize_audio_static(audio, source_angle_deg)
 
-    sf.write(output_file, output, sample_rate)
-    print(f"Audio saved: {output_file}")
+    sf.write(output_file+f"/spatial_output{source_angle_deg}.wav", output, sample_rate)
+    print(f"Audio saved: {output_file}/spatial_output{source_angle_deg}.wav")
 
 # === GUI APPLICATION ===
 class SpatialAudioApp:
@@ -132,7 +103,7 @@ class SpatialAudioApp:
         
         self.trajectory = self.generate_trajectory()
         threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.trajectory, self.dynamic.get(), 
-                        self.mode.get(), self.fixed_azimuth.get(), f"spatial_output{self.fixed_azimuth.get()}.wav")).start()
+                        self.mode.get(), self.fixed_azimuth.get(), f"results_{self.mode.get()}")).start()
         # threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.trajectory, self.mode.get(), f"spatial_output{self.fixed_azimuth.get()}.wav")).start()
         
 

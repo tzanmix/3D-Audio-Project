@@ -15,7 +15,7 @@ def vbap_2d_5_0(source_angle_deg):
     speaker_pairs = [
         (0, 2),  # FL - C
         (2, 1),  # C - FR
-        # (0, 2),  # FL - FR
+        # (0, 1),  # FL - FR
         (0, 3),  # FL - SL
         (1, 4),  # FR - SR
         (3, 4),  # SL - SR
