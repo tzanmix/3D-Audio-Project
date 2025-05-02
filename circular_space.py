@@ -2,8 +2,9 @@ import tkinter as tk
 import math
 
 class PieSlice:
-    def __init__(self, canvas, center, radius, start_angle, extent, color, degree, callback):
+    def __init__(self, canvas, center, radius, start_angle, extent, color, degree, callback, app_ref):
         self.canvas = canvas
+        self.color = color
         self.center = center
         self.radius = radius
         self.start_angle = start_angle
@@ -15,7 +16,13 @@ class PieSlice:
             start=start_angle, extent=extent,
             fill=color, outline='black'
         )
-        canvas.tag_bind(self.id, '<Button-1>', lambda event: callback(degree))
+        self.highlight_color = "#add8e6"
+        self.selected_color = "#87cefa"
+        self.app_ref = app_ref  # Reference to parent app
+        # Event bindings
+        canvas.tag_bind(self.id, "<Enter>", self.on_hover)
+        canvas.tag_bind(self.id, "<Leave>", self.on_leave)
+        canvas.tag_bind(self.id, "<Button-1>", lambda event: callback(degree, self))
 
         # Calculate label position
         mid_angle_rad = math.radians((start_angle + extent / 2))
@@ -24,6 +31,20 @@ class PieSlice:
 
         # Display degree label
         canvas.create_text(label_x, label_y, text=str(degree)+'°', fill='black', font=('Arial', 12, 'bold'))
+
+    def on_hover(self, event):
+            if self.app_ref.selected_slice != self:
+                self.canvas.itemconfig(self.id, fill=self.highlight_color)
+
+    def on_leave(self, event):
+        if self.app_ref.selected_slice != self:
+            self.canvas.itemconfig(self.id, fill=self.color)
+
+    def highlight(self):
+        self.canvas.itemconfig(self.id, fill=self.selected_color)
+
+    def unhighlight(self):
+        self.canvas.itemconfig(self.id, fill=self.color)
 
 class PieChartApp:
     def __init__(self, root, label_var, slices=24):
@@ -34,6 +55,7 @@ class PieChartApp:
         self.radius = 300
         self.slices = slices
         self.selected_degree = 0
+        self.selected_slice = None
         self.selected_label_var = label_var
 
         self.draw_pie()
@@ -54,11 +76,19 @@ class PieChartApp:
                 extent = - angle_per_slice, #clockwise direction
                 color = 'white',
                 degree = degree,
-                callback = self.on_slice_click
+                callback = self.on_slice_click,
+                app_ref = self
             )
 
-    def on_slice_click(self, degree):
+    def on_slice_click(self, degree, slice_obj):
+        # Unhighlight previous
+        if self.selected_slice:
+            self.selected_slice.unhighlight()
+
         self.selected_degree = degree
+        self.selected_slice = slice_obj
+        self.selected_slice.highlight()
+
         print(f"Selected: {self.selected_degree}°")
         self.selected_label_var.set(degree)
 
