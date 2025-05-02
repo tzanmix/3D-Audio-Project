@@ -41,9 +41,11 @@ class PieChartApp:
     def draw_pie(self):
         angle_per_slice = 360 / self.slices
         for i in range(self.slices):
-            start_angle = -90 - i * angle_per_slice #0 degress on top
+            
             raw_degree = -180 + i * angle_per_slice
             degree = round(raw_degree / 5) * 5
+            center_angle = - raw_degree + 105
+            start_angle = center_angle - angle_per_slice/2
             PieSlice(
                 self.canvas,
                 self.center,

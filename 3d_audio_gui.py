@@ -48,8 +48,12 @@ def process_audio(audio, sr, trajectory, dynamic, mode, source_angle_deg, output
         else:
             output = vbap_static_5_0.spatialize_audio_static(audio, source_angle_deg)
 
-    sf.write(output_file+f"/spatial_output{source_angle_deg}.wav", output, sample_rate)
-    print(f"Audio saved: {output_file}/spatial_output{source_angle_deg}.wav")
+    if dynamic:
+        output_file = output_file+"/spatial_output_dynamic.wav"
+    else:
+        output_file = output_file+f"/spatial_output{source_angle_deg}.wav"
+    sf.write(output_file, output, sample_rate)
+    print(f"Audio saved: {output_file}")
 
 # === GUI APPLICATION ===
 class SpatialAudioApp:
@@ -77,7 +81,7 @@ class SpatialAudioApp:
         tk.Label(self.root, text="Fixed Azimuth (if Static):").pack()
 
         self.fixed_azimuth = tk.DoubleVar(value=0)
-        azimuth_selection = circular_space.PieChartApp(self.root, label_var=self.fixed_azimuth)
+        circular_space.PieChartApp(self.root, label_var=self.fixed_azimuth)
         tk.Label(self.root, textvariable=self.fixed_azimuth).pack()
         tk.Button(self.root, text="Run Simulation", command=self.run_simulation).pack()
 

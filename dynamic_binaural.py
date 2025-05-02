@@ -47,13 +47,15 @@ def spatialize_audio_dynamic(audio, sr):
         if len(frame) < frame_size:
             frame = np.pad(frame, (0, frame_size - len(frame)))
 
-        # Dynamic azimuth from -80° to +80°
-        azimuth = -180 + (360 * i / max(1, n_frames - 1))
+        # Dynamic azimuth from -180° to +180°
+        sweep_cycles = n_frames // 5
+        frame_in_sweep = i  % sweep_cycles
+        azimuth = -180 + 360 * (frame_in_sweep / sweep_cycles)
         el_idx, az_idx = get_nearest_hrir_indices(azimuth, elevation)
 
         # Get HRIRs, convert to min-phase, and pad
-        hrir_l = minimum_phase(pad_hrir(hrir_l_raw[el_idx, az_idx, :], hrir_pad_len))
-        hrir_r = minimum_phase(pad_hrir(hrir_r_raw[el_idx, az_idx, :], hrir_pad_len))
+        hrir_l = pad_hrir(hrir_l_raw[el_idx, az_idx, :], hrir_pad_len)
+        hrir_r = pad_hrir(hrir_r_raw[el_idx, az_idx, :], hrir_pad_len)
 
         # Convolve
         conv_l = scipy.signal.fftconvolve(frame, hrir_l, mode='full')
