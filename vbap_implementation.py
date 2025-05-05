@@ -47,7 +47,7 @@ def vbap_2d_5_0(source_angle_deg):
             gains_full[j] = gains_pair[1]
             best_gains = gains_full
             best_pair = (speaker_names[i], speaker_names[j])
-            break  # Stop at first valid pair (could refine to closest match)
+            break
 
     if best_gains is None:
         raise ValueError("No suitable speaker pair found for the given source direction")

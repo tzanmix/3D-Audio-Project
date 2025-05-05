@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import soundfile as sf
-import matplotlib.pyplot as plt
 import librosa
 import tkinter as tk
 from tkinter import filedialog, ttk
@@ -33,7 +32,7 @@ def find_closest_azimuth(deg):
     return np.argmin(np.abs(cipic_azimuths - deg))
 
 
-def process_audio(audio, sr, trajectory, dynamic, mode, source_angle_deg, output_file):
+def process_audio(audio, sr, dynamic, mode, source_angle_deg, output_file):
     if not os.path.exists(output_file):
         os.makedirs(output_file)
     if mode == "headphones":
@@ -60,10 +59,10 @@ class SpatialAudioApp:
     def __init__(self, root):
         self.root = root
         self.audio = None
-        self.trajectory = []
         self.mode = tk.StringVar(value = "headphones")
         self.dynamic = tk.BooleanVar(value = True)
         self.fixed_azimuth = tk.DoubleVar(value = 0)
+        self.audio_file_loaded = tk.StringVar(value= "No audio file selected")
 
         self.build_gui()
 
@@ -71,7 +70,7 @@ class SpatialAudioApp:
         self.root.title("Spatial Audio Simulator")
         tk.Label(self.root, text="Select Audio File:").pack()
         tk.Button(self.root, text="Load Audio", command=self.load_audio).pack()
-
+        tk.Label(self.root, textvariable=self.audio_file_loaded).pack()
         tk.Label(self.root, text="Mode:").pack()
         ttk.Combobox(self.root, textvariable=self.mode, values=["headphones", "speakers"]).pack()
 
@@ -82,7 +81,6 @@ class SpatialAudioApp:
 
         self.fixed_azimuth = tk.DoubleVar(value=0)
         circular_space.PieChartApp(self.root, label_var=self.fixed_azimuth)
-        tk.Label(self.root, textvariable=self.fixed_azimuth).pack()
         tk.Button(self.root, text="Run Simulation", command=self.run_simulation).pack()
 
     def load_audio(self):
@@ -91,24 +89,15 @@ class SpatialAudioApp:
             self.audio, self.sr = librosa.load(file_path, sr=sample_rate, mono=True)
             self.audio = self.audio / np.max(np.abs(self.audio))  # Normalize
             print(f"Loaded: {file_path}")
-
-    def generate_trajectory(self):
-        num_blocks = int(np.ceil(len(self.audio) / block_size))
-        if self.dynamic.get():
-            speed_multiplier = 5  # Number of revolutions
-            trajectory = np.linspace(0, 360 * speed_multiplier, num_blocks) % 360
-            return trajectory
-        return np.full(num_blocks, self.fixed_azimuth.get())
+            self.audio_file_loaded.set(file_path)
 
     def run_simulation(self):
         if self.audio is None:
             print("Load an audio file first!")
             return
         
-        self.trajectory = self.generate_trajectory()
-        threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.trajectory, self.dynamic.get(), 
+        threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.dynamic.get(), 
                         self.mode.get(), self.fixed_azimuth.get(), f"results_{self.mode.get()}")).start()
-        # threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.trajectory, self.mode.get(), f"spatial_output{self.fixed_azimuth.get()}.wav")).start()
         
 
 # === RUN GUI ===

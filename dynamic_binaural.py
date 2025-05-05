@@ -2,28 +2,25 @@ import numpy as np
 import scipy.io
 import scipy.signal
 from scipy.signal import butter, sosfilt, minimum_phase
+import pysofaconventions as sofa
 
 # === Config ===
-hrir_path = "hrir_final.mat"
+sofa_file_path = "D2_96K_24bit_512tap_FIR_SOFA.sofa"
 frame_size = 2048
 hop_size = 1024  # 50% overlap
 hrir_pad_len = 256
 elevation = 0  # fixed elevation
 
-# === Load CIPIC HRIRs ===
-cipic = scipy.io.loadmat(hrir_path)
-hrir_l_raw = cipic['hrir_l']
-hrir_r_raw = cipic['hrir_r']
+# === Load SOFA HRIRs ===
+sf_obj = sofa.SOFAFile(sofa_file_path, 'r')
+hrirs = sf_obj.getDataIR()  # shape: [M, 2, N]
+positions = sf_obj.getVariableValue("SourcePosition")  # shape: [M, 3] (azimuth, elev, distance)
 
-elevations = np.linspace(-45, 230.625, 25)
-azimuths = np.array([-180.0, -172.65306122, -165.30612245, -157.95918367, -150.6122449, -143.26530612, -135.91836735, -128.57142857, -121.2244898, -113.87755102, -106.53061224, -99.18367347, -91.83673469, -84.48979592, -77.14285714, -69.79591837, -62.44897959, -55.10204082, -47.75510204, -40.40816327, -33.06122449, -25.71428571, -18.36734694, -11.02040816, -3.67346939, 3.67346939, 11.02040816, 18.36734694, 25.71428571, 33.06122449, 40.40816327, 47.75510204, 55.10204082, 62.44897959, 69.79591837, 77.14285714, 84.48979592, 91.83673469, 99.18367347, 106.53061224, 113.87755102, 121.2244898, 128.57142857, 135.91836735, 143.26530612, 150.6122449, 157.95918367, 165.30612245, 172.65306122, 180.0
-])
-# azimuths = np.concatenate([azimuths, 180 - azimuths[::-1]])[:50]
-
-def get_nearest_hrir_indices(target_az, target_el):
-    el_idx = (np.abs(elevations - target_el)).argmin()
-    az_idx = (np.abs(azimuths - target_az)).argmin()
-    return el_idx, az_idx
+# === Find closest match ===
+def find_nearest_hrir(target_az, target_el, positions):
+    diffs = positions[:, :2] - np.array([target_az, target_el])
+    dists = np.linalg.norm(diffs, axis=1)
+    return np.argmin(dists)
 
 def pad_hrir(hrir, target_len=256):
     return np.pad(hrir, (0, max(0, target_len - len(hrir))), mode='constant')
@@ -39,6 +36,7 @@ def spatialize_audio_dynamic(audio, sr):
     output_left = np.zeros(output_len)
     output_right = np.zeros(output_len)
 
+
     # === Process audio frame by frame ===
     for i in range(n_frames):
         start = i * hop_size
@@ -50,12 +48,12 @@ def spatialize_audio_dynamic(audio, sr):
         # Dynamic azimuth from -180° to +180°
         sweep_cycles = n_frames // 5
         frame_in_sweep = i  % sweep_cycles
-        azimuth = -180 + 360 * (frame_in_sweep / sweep_cycles)
-        el_idx, az_idx = get_nearest_hrir_indices(azimuth, elevation)
+        azimuth = 0 + 360 * (frame_in_sweep / sweep_cycles)
+        idx = find_nearest_hrir(azimuth, elevation, positions)
 
         # Get HRIRs, convert to min-phase, and pad
-        hrir_l = pad_hrir(hrir_l_raw[el_idx, az_idx, :], hrir_pad_len)
-        hrir_r = pad_hrir(hrir_r_raw[el_idx, az_idx, :], hrir_pad_len)
+        hrir_l = pad_hrir(hrirs[idx, 0, :], hrir_pad_len)
+        hrir_r = pad_hrir(hrirs[idx, 1, :], hrir_pad_len)
 
         # Convolve
         conv_l = scipy.signal.fftconvolve(frame, hrir_l, mode='full')
