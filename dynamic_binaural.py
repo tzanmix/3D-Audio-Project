@@ -1,7 +1,6 @@
 import numpy as np
-import scipy.io
 import scipy.signal
-from scipy.signal import butter, sosfilt, minimum_phase
+from scipy.signal import butter, sosfilt
 import pysofaconventions as sofa
 
 # === Config ===

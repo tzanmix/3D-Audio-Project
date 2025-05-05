@@ -1,7 +1,6 @@
 import numpy as np
-import scipy.io
 import scipy.signal
-from scipy.signal import butter, sosfilt, minimum_phase
+from scipy.signal import butter, sosfilt
 import pysofaconventions as sofa
 
 # === Config with SOFA db ===
@@ -24,7 +23,7 @@ def find_nearest_hrir(target_az, target_el, positions):
 def pad_hrir(hrir, target_len=256):
     return np.pad(hrir, (0, max(0, target_len - len(hrir))), mode='constant')
 
-# === Optional: high-pass filter to reduce low-end rumble ===
+# === high-pass filter to reduce low-end rumble ===
 def highpass(signal, sr, cutoff=80, order=4):
     sos = butter(order, cutoff, btype='highpass', fs=sr, output='sos')
     return sosfilt(sos, signal)
@@ -53,6 +52,7 @@ def spatialize_audio_static(audio, sr, target_azimuth):
     left = left[:min_len]
     right = right[:min_len]
 
+    # === Normalize output with -3 dB headroom ===
     max_val = max(np.max(np.abs(left)), np.max(np.abs(right)))
     headroom_db = -3
     scaling = 10**(headroom_db / 20)
