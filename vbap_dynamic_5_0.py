@@ -25,7 +25,7 @@ def spatialize_audio_dynamic(audio, sr, block_size=1024):
 
     return output_audio
 
-# Example usage: pan from left to right across 5 seconds
+# pan from left to right across 5 seconds
 def angle_function(t):
-    return -180 + 360 * (t / 10.0)  # sweep -90° to +90° over 10 seconds
+    return -180 + 360 * (t / 10.0)
 
