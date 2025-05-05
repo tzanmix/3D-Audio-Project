@@ -1,6 +1,6 @@
 *.wav
 *.mp3
-vbap_test.py
 results
 __pycache__
 hrir_final.mat
+D2_96K_24bit_512tap_FIR_SOFA.sofa
