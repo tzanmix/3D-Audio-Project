@@ -4,7 +4,6 @@ from scipy.signal import butter, sosfilt
 import pysofaconventions as sofa
 
 # === Config with SOFA db ===
-hrir_path = "hrir_final.mat"
 target_elevation = 9
 sofa_file_path = "D2_96K_24bit_512tap_FIR_SOFA.sofa"
 
@@ -28,36 +27,36 @@ def highpass(signal, sr, cutoff=80, order=4):
     sos = butter(order, cutoff, btype='highpass', fs=sr, output='sos')
     return sosfilt(sos, signal)
 
-def spatialize_audio_static(audio, sr, target_azimuth):
+def spatialize_audio_static(audio, sr, selected_azimuth):
     # gui azimuth selection ranges from -180 to 180 degrees
     # while sofa available azimuths from 0 to 360 degrees
-    target_azimuth = target_azimuth + 180
-
+    if selected_azimuth == -180:
+        target_azimuth = 180
+    elif selected_azimuth == 0:
+        target_azimuth = -180
+    else:
+        target_azimuth = selected_azimuth + 180
+    print(f"Selected Azimuth: {selected_azimuth},  Target Azimuth: {target_azimuth}")
     # === Select nearest HRIR ===
     idx = find_nearest_hrir(target_azimuth, target_elevation, positions)
-    hrir_l = pad_hrir(hrirs[idx, 0, :])
-    hrir_r = pad_hrir(hrirs[idx, 1, :])
-
-    print(f"Using HRIR #{idx} for azimuth={positions[idx, 0] - 180}°, elevation={positions[idx, 1]}°")
+    hrir_l = hrirs[idx, 0, :]
+    hrir_r = hrirs[idx, 1, :]
+    print(f"Using HRIR #{idx} for azimuth={positions[idx, 0]}°, elevation={positions[idx, 1]}°")
 
     # === Convolve audio ===
     left = scipy.signal.fftconvolve(audio, hrir_l, mode='full')
     right = scipy.signal.fftconvolve(audio, hrir_r, mode='full')
-
-    left = highpass(left, sr)
-    right = highpass(right, sr)
 
     # === Normalize and trim ===
     min_len = min(len(left), len(right))
     left = left[:min_len]
     right = right[:min_len]
 
-    # === Normalize output with -3 dB headroom ===
     max_val = max(np.max(np.abs(left)), np.max(np.abs(right)))
-    headroom_db = -3
-    scaling = 10**(headroom_db / 20)
-    left *= scaling / max_val
-    right *= scaling / max_val
+    if max_val > 0:
+        scale = 0.99 / max_val
+        left *= scale
+        right *= scale
 
     # === Combine stereo ===
     stereo = np.stack([left, right], axis=1)
