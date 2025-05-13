@@ -40,6 +40,21 @@ def process_audio(audio, sr, dynamic, mode, source_angle_deg, output_file):
     sf.write(output_file, output, sample_rate)
     print(f"Audio saved: {output_file}")
     out_file = output_file
+    splash.destroy()
+
+class Splash(tk.Toplevel):
+    def __init__(self, parent):
+        tk.Toplevel.__init__(self, parent)
+        self.title("")
+        self.geometry("300x200")
+        progressbar = ttk.Progressbar(self, mode="indeterminate")
+        progressbar.place(x=20, y=80, width=260)
+        progressbar.start()
+        tk.Label(self, text="Please wait...").pack()
+        self.grab_set()
+
+
+
 
 # === GUI APPLICATION ===
 class SpatialAudioApp:
@@ -52,8 +67,13 @@ class SpatialAudioApp:
         self.fixed_azimuth = tk.DoubleVar(value = 0)
         self.audio_file_loaded = tk.StringVar(value= "No audio file selected")
         self.isPlaying = False
-        self.build_gui()
+        self.paused_input = False
         self.track_length = 0
+        self.playing_output = False
+        self.paused_output = False
+        self.output_mixer_button_text = tk.StringVar(value="Play Output")
+        self.build_gui()
+        
 
     def build_gui(self):
         self.root.title("Spatial Audio Simulator")
@@ -75,6 +95,7 @@ class SpatialAudioApp:
         circular_space.PieChartApp(self.root, label_var=self.fixed_azimuth)
         # tk.Button(self.root, text="Simulate Live (in progress)", command=self.simulate_live).pack()
         tk.Button(self.root, text="Save Audio", command=self.run_simulation).pack()
+        tk.Button(self.root, textvariable=self.output_mixer_button_text, command=self.play_output).pack()
 
     def load_audio(self):
         file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav;*.mp3")])
@@ -105,7 +126,8 @@ class SpatialAudioApp:
         if self.audio is None:
             print("Load an audio file first!")
             return
-        
+        global splash
+        splash = Splash(self.root)
         threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.dynamic.get(), 
                         self.mode.get(), self.fixed_azimuth.get(), f"results_{self.mode.get()}")).start()
     
@@ -131,6 +153,28 @@ class SpatialAudioApp:
             pygame.mixer.music.play()
         else:
             print("No audio file is playing")
+    
+    def play_output(self):
+        if self.audio is None:
+            print("Load an audio file first!")
+            return
+        if not self.playing_output and not self.paused_output:
+            print("Now playing: ", out_file)
+            self.paused_output = False
+            self.output_mixer_button_text.set("Pause Output")
+            pygame.mixer.music.pause()
+            pygame.mixer.music.unload()
+            pygame.mixer.music.load(out_file)
+            pygame.mixer.music.play()
+        elif self.playing_output and not self.paused_output:
+            self.paused_output = True
+            self.output_mixer_button_text.set("Play Output")
+            pygame.mixer.music.pause()
+        else:
+            self.paused_output = False
+            self.output_mixer_button_text.set("Pause Output")
+            pygame.mixer.music.unpause()
+        self.playing_output = not self.playing_output
         
 
 # === RUN GUI ===

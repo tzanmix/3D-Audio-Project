@@ -6,16 +6,15 @@ import pysofaconventions as sofa
 # === Config ===
 sofa_file_path = "D2_96K_24bit_512tap_FIR_SOFA.sofa"
 frame_size = 2048
-hop_size = 1024  # 50% overlap
+hop_size = 1024
 hrir_pad_len = 256
 elevation = 0  # fixed elevation
 
 # === Load SOFA HRIRs ===
 sf_obj = sofa.SOFAFile(sofa_file_path, 'r')
-hrirs = sf_obj.getDataIR()  # shape: [M, 2, N]
-positions = sf_obj.getVariableValue("SourcePosition")  # shape: [M, 3] (azimuth, elev, distance)
+hrirs = sf_obj.getDataIR()
+positions = sf_obj.getVariableValue("SourcePosition")
 
-# === Find closest match ===
 def find_nearest_hrir(target_az, target_el, positions):
     diffs = positions[:, :2] - np.array([target_az, target_el])
     dists = np.linalg.norm(diffs, axis=1)
@@ -29,14 +28,14 @@ def highpass(signal, sr, cutoff=80, order=4):
     return sosfilt(sos, signal)
 
 def spatialize_audio_dynamic(audio, sr):
-    # === Set up output buffer ===
+
     n_frames = int(np.ceil((len(audio) - frame_size) / hop_size)) + 1
     output_len = (n_frames - 1) * hop_size + frame_size + hrir_pad_len - 1
     output_left = np.zeros(output_len)
     output_right = np.zeros(output_len)
 
 
-    # === Process audio frame by frame ===
+    # Process audio frame by frame
     for i in range(n_frames):
         start = i * hop_size
         end = start + frame_size
@@ -73,7 +72,7 @@ def spatialize_audio_dynamic(audio, sr):
         output_left[out_start:out_end] += conv_l
         output_right[out_start:out_end] += conv_r
 
-    # === Normalize output with -3 dB headroom ===
+    # Normalize output with -3 dB headroom
     max_val = max(np.max(np.abs(output_left)), np.max(np.abs(output_right)))
     scaling = 10 ** (-3 / 20) / max_val
     output_left *= scaling
