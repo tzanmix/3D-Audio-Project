@@ -128,6 +128,8 @@ class SpatialAudioApp:
             return
         global splash
         splash = Splash(self.root)
+        self.paused_output = False
+        self.playing_output = False
         threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.dynamic.get(), 
                         self.mode.get(), self.fixed_azimuth.get(), f"results_{self.mode.get()}")).start()
     
