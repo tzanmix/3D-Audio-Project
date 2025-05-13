@@ -11,6 +11,7 @@ import static_binaural
 import vbap_dynamic_5_0
 import vbap_static_5_0
 import pygame
+import os
 
 block_size = 512
 sample_rate = 44100
@@ -102,8 +103,8 @@ class SpatialAudioApp:
         if file_path:
             self.audio, self.sr = librosa.load(file_path, sr=sample_rate, mono=True)
             self.audio = self.audio / np.max(np.abs(self.audio))  # Normalize
-            print(f"Loaded: {file_path}")
-            self.audio_file_loaded.set(file_path)
+            print(f"Loaded: {os.path.basename(file_path)[:-4]}")
+            self.audio_file_loaded.set(os.path.basename(file_path)[:-4])
             pygame.mixer.music.load(file_path)
             pygame.mixer.music.play()
             pygame.mixer.music.pause()
