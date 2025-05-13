@@ -56,7 +56,6 @@ class Splash(tk.Toplevel):
 
 
 
-# === GUI APPLICATION ===
 class SpatialAudioApp:
     def __init__(self, root):
         self.root = root
@@ -177,7 +176,6 @@ class SpatialAudioApp:
         self.playing_output = not self.playing_output
         
 
-# === RUN GUI ===
 root = tk.Tk()
 app = SpatialAudioApp(root)
 root.mainloop()
