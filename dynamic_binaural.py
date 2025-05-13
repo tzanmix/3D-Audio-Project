@@ -3,14 +3,13 @@ import scipy.signal
 from scipy.signal import butter, sosfilt
 import pysofaconventions as sofa
 
-# === Config ===
 sofa_file_path = "D2_96K_24bit_512tap_FIR_SOFA.sofa"
 frame_size = 2048
 hop_size = 1024
 hrir_pad_len = 256
-elevation = 0  # fixed elevation
+elevation = 0
 
-# === Load SOFA HRIRs ===
+# Load SOFA HRIRs
 sf_obj = sofa.SOFAFile(sofa_file_path, 'r')
 hrirs = sf_obj.getDataIR()
 positions = sf_obj.getVariableValue("SourcePosition")
@@ -53,10 +52,8 @@ def spatialize_audio_dynamic(audio, sr):
         hrir_l = pad_hrir(hrirs[idx, 0, :], hrir_pad_len)
         hrir_r = pad_hrir(hrirs[idx, 1, :], hrir_pad_len)
 
-        # Convolve
         conv_l = scipy.signal.fftconvolve(frame, hrir_l, mode='full')
         conv_r = scipy.signal.fftconvolve(frame, hrir_r, mode='full')
-
         # High-pass to remove low-end artifacts
         conv_l = highpass(conv_l, sr)
         conv_r = highpass(conv_r, sr)
