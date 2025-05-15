@@ -58,8 +58,6 @@ class SpatialAudioApp:
         tk.CTkLabel(self.root, text="Select Audio File:").pack()
         tk.CTkButton(self.root, text="Load Audio", command=self.load_audio).pack()
         tk.CTkLabel(self.root, textvariable=self.audio_file_loaded).pack()
-        # self.progress = ttk.Scale(root, from_=0, to=self.track_length, orient="horizontal", length=300).pack(pady=10)
-        # self.update_progress()
         tk.CTkButton(self.root, textvariable=self.play_button_symbol, command=self.play_audio).pack()
         tk.CTkLabel(self.root, text="Mode:").pack()
         tk.CTkComboBox(self.root, variable=self.mode, values=["headphones", "speakers"]).pack()
@@ -71,16 +69,15 @@ class SpatialAudioApp:
 
         self.fixed_azimuth = tk.DoubleVar(value=0)
         azimuth_canvas.PieChartApp(self.root, label_var=self.fixed_azimuth)
-        # tk.Button(self.root, text="Simulate Live (in progress)", command=self.simulate_live).pack()
-        tk.CTkButton(self.root, text="Save Audio", command=self.run_simulation).pack()
-        tk.CTkButton(self.root, textvariable=self.output_mixer_button_text, command=self.play_output).pack()
+        tk.CTkButton(self.root, text="Save Audio", command=self.run_simulation).pack(pady=5)
+        tk.CTkButton(self.root, textvariable=self.output_mixer_button_text, command=self.play_output).pack(pady=5)
 
     def load_audio(self):
         file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav;*.mp3")])
         pygame.mixer.music.unload()
         if file_path:
             self.audio, self.sr = librosa.load(file_path, sr=sample_rate, mono=True)
-            self.audio = self.audio / np.max(np.abs(self.audio))  # Normalize
+            self.audio = self.audio / np.max(np.abs(self.audio))
             print(f"Loaded: {os.path.basename(file_path)[:-4]}")
             self.audio_file_loaded.set(os.path.basename(file_path)[:-4])
             pygame.mixer.music.load(file_path)
@@ -111,28 +108,6 @@ class SpatialAudioApp:
         threading.Thread(target=lambda: self.process_audio(self.audio, self.sr, self.dynamic.get(), 
                         self.mode.get(), self.fixed_azimuth.get(), f"results_{self.mode.get()}")).start()
     
-
-    # def update_progress(self):
-    #     if self.is_playing:
-    #         elapsed = int(time.time() - self.start_time)
-    #         self.progress.set(min(elapsed, self.track_length))
-    #     self.root.after(500, self.update_progress)
-
-    def simulate_live(self):
-        if self.audio is None:
-            print("Load an audio file first!")
-            return
-        if self.isPlaying:
-            pygame.mixer.music.pause()
-            # pygame.mixer.music.set_pos()
-            pygame.mixer.music.unload()
-            self.run_simulation()
-            # pygame loads only file objects?
-            pygame.mixer.music.load(self.out_file)
-            # pygame.mixer.music.get_pos()
-            pygame.mixer.music.play()
-        else:
-            print("No audio file is playing")
     
     def play_output(self):
         if self.audio is None:

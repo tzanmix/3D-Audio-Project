@@ -14,10 +14,10 @@ class PieSlice:
             center[0] - radius, center[1] - radius,
             center[0] + radius, center[1] + radius,
             start=start_angle, extent=extent,
-            fill=color, outline='black'
+            fill=color, outline='white'
         )
-        self.highlight_color = "#add8e6"
-        self.selected_color = "#87cefa"
+        self.highlight_color = "#bd20a3"
+        self.selected_color = "#701a62"
         self.app_ref = app_ref  # Reference to parent app
         # Event bindings
         canvas.tag_bind(self.id, "<Enter>", self.on_hover)
@@ -30,7 +30,7 @@ class PieSlice:
         label_y = center[1] - (radius / 2) * math.sin(mid_angle_rad)
 
         # Display degree label
-        canvas.create_text(label_x, label_y, text=str(degree)+'°', fill='black', font=('Arial', 12, 'bold'))
+        canvas.create_text(label_x, label_y, text=str(degree)+'°', fill='white', font=('Arial', 12, 'bold'))
 
     def on_hover(self, event):
             if self.app_ref.selected_slice != self:
@@ -74,7 +74,7 @@ class PieChartApp:
                 self.radius,
                 start_angle = start_angle,
                 extent = - angle_per_slice, #clockwise direction
-                color = 'white',
+                color = '#23272D',
                 degree = degree,
                 callback = self.on_slice_click,
                 app_ref = self
@@ -97,9 +97,4 @@ class PieChartApp:
         return self.selected_degree
 
 
-# if __name__ == '__main__':
-#     root = tk.Tk()
-#     root.title("Clickable Pie Chart")
-#     app = PieChartApp(root)
-#     root.mainloop()
     
