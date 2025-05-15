@@ -2,8 +2,8 @@ import os
 import numpy as np
 import soundfile as sf
 import librosa
-import tkinter as tk
-from tkinter import filedialog, ttk
+import customtkinter as tk
+from tkinter import filedialog
 import threading
 import circular_space
 import dynamic_binaural
@@ -19,15 +19,15 @@ pygame.mixer.init()
 
 
 
-class Splash(tk.Toplevel):
+class Splash(tk.CTkToplevel):
     def __init__(self, parent):
-        tk.Toplevel.__init__(self, parent)
+        tk.CTkToplevel.__init__(self, parent)
         self.title("")
         self.geometry("300x200")
-        progressbar = ttk.Progressbar(self, mode="indeterminate")
-        progressbar.place(x=20, y=80, width=260)
+        progressbar = tk.CTkProgressBar(self, orientation="horizontal", mode="indeterminate")
+        # progressbar.place(x=20, y=80, width=260)
         progressbar.start()
-        tk.Label(self, text="Please wait...").pack()
+        tk.CTkLabel(self, text="Please wait...").pack()
         self.grab_set()
 
 
@@ -54,25 +54,25 @@ class SpatialAudioApp:
 
     def build_gui(self):
         self.root.title("Spatial Audio Simulator")
-        tk.Label(self.root, text="Select Audio File:").pack()
-        tk.Button(self.root, text="Load Audio", command=self.load_audio).pack()
-        tk.Label(self.root, textvariable=self.audio_file_loaded).pack()
+        tk.CTkLabel(self.root, text="Select Audio File:").pack()
+        tk.CTkButton(self.root, text="Load Audio", command=self.load_audio).pack()
+        tk.CTkLabel(self.root, textvariable=self.audio_file_loaded).pack()
         # self.progress = ttk.Scale(root, from_=0, to=self.track_length, orient="horizontal", length=300).pack(pady=10)
         # self.update_progress()
-        tk.Button(self.root, textvariable=self.play_button_symbol, command=self.play_audio).pack()
-        tk.Label(self.root, text="Mode:").pack()
-        ttk.Combobox(self.root, textvariable=self.mode, values=["headphones", "speakers"]).pack()
+        tk.CTkButton(self.root, textvariable=self.play_button_symbol, command=self.play_audio).pack()
+        tk.CTkLabel(self.root, text="Mode:").pack()
+        tk.CTkComboBox(self.root, variable=self.mode, values=["headphones", "speakers"]).pack()
 
-        tk.Label(self.root, text="Motion:").pack()
-        ttk.Checkbutton(self.root, text="Dynamic", variable=self.dynamic).pack()
+        tk.CTkLabel(self.root, text="Motion:").pack()
+        tk.CTkCheckBox(self.root, text="Dynamic", variable=self.dynamic).pack()
         
-        tk.Label(self.root, text="Fixed Azimuth (if Static):").pack()
+        tk.CTkLabel(self.root, text="Fixed Azimuth (if Static):").pack()
 
         self.fixed_azimuth = tk.DoubleVar(value=0)
         circular_space.PieChartApp(self.root, label_var=self.fixed_azimuth)
         # tk.Button(self.root, text="Simulate Live (in progress)", command=self.simulate_live).pack()
-        tk.Button(self.root, text="Save Audio", command=self.run_simulation).pack()
-        tk.Button(self.root, textvariable=self.output_mixer_button_text, command=self.play_output).pack()
+        tk.CTkButton(self.root, text="Save Audio", command=self.run_simulation).pack()
+        tk.CTkButton(self.root, textvariable=self.output_mixer_button_text, command=self.play_output).pack()
 
     def load_audio(self):
         file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav;*.mp3")])
@@ -180,6 +180,6 @@ class SpatialAudioApp:
         splash.destroy()
         
 
-root = tk.Tk()
+root = tk.CTk()
 app = SpatialAudioApp(root)
 root.mainloop()
