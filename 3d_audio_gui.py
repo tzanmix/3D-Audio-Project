@@ -5,7 +5,7 @@ import librosa
 import customtkinter as tk
 from tkinter import filedialog
 import threading
-import circular_space
+import azimuth_canvas
 import dynamic_binaural
 import static_binaural
 import vbap_dynamic_5_0
@@ -23,11 +23,11 @@ class Splash(tk.CTkToplevel):
     def __init__(self, parent):
         tk.CTkToplevel.__init__(self, parent)
         self.title("")
-        self.geometry("300x200")
-        progressbar = tk.CTkProgressBar(self, orientation="horizontal", mode="indeterminate")
-        # progressbar.place(x=20, y=80, width=260)
-        progressbar.start()
+        self.geometry("300x150")
         tk.CTkLabel(self, text="Please wait...").pack()
+        progressbar = tk.CTkProgressBar(self, orientation="horizontal", mode="indeterminate", width=260)
+        progressbar.pack(padx=20, pady=50)
+        progressbar.start()
         self.grab_set()
 
 
@@ -54,6 +54,7 @@ class SpatialAudioApp:
 
     def build_gui(self):
         self.root.title("Spatial Audio Simulator")
+        self.root.geometry("400x600")
         tk.CTkLabel(self.root, text="Select Audio File:").pack()
         tk.CTkButton(self.root, text="Load Audio", command=self.load_audio).pack()
         tk.CTkLabel(self.root, textvariable=self.audio_file_loaded).pack()
@@ -69,7 +70,7 @@ class SpatialAudioApp:
         tk.CTkLabel(self.root, text="Fixed Azimuth (if Static):").pack()
 
         self.fixed_azimuth = tk.DoubleVar(value=0)
-        circular_space.PieChartApp(self.root, label_var=self.fixed_azimuth)
+        azimuth_canvas.PieChartApp(self.root, label_var=self.fixed_azimuth)
         # tk.Button(self.root, text="Simulate Live (in progress)", command=self.simulate_live).pack()
         tk.CTkButton(self.root, text="Save Audio", command=self.run_simulation).pack()
         tk.CTkButton(self.root, textvariable=self.output_mixer_button_text, command=self.play_output).pack()
