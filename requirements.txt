@@ -1,6 +1,0 @@
-librosa==0.11.0
-numpy==2.2.5
-pygame==2.6.1
-pysofaconventions==0.1.5
-scipy==1.15.3
-soundfile==0.13.1

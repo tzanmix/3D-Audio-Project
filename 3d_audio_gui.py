@@ -17,31 +17,7 @@ block_size = 512
 sample_rate = 44100
 pygame.mixer.init()
 
-def process_audio(audio, sr, dynamic, mode, source_angle_deg, output_file):
-    global out_file
-    out_file = ''
-    if not os.path.exists(output_file):
-        os.makedirs(output_file)
-    if mode == "headphones":
-        if dynamic:
-            output = dynamic_binaural.spatialize_audio_dynamic(audio, sr)
-        else:
-            output = static_binaural.spatialize_audio_static(audio, sr, source_angle_deg)
-    else:
-        print("Processing 5.0 Surround Audio...")
-        if dynamic:
-            output = vbap_dynamic_5_0.spatialize_audio_dynamic(audio, sr)
-        else:
-            output = vbap_static_5_0.spatialize_audio_static(audio, source_angle_deg)
 
-    if dynamic:
-        output_file = output_file+"/spatial_output_dynamic.wav"
-    else:
-        output_file = output_file+f"/spatial_output{source_angle_deg}.wav"
-    sf.write(output_file, output, sample_rate)
-    print(f"Audio saved: {output_file}")
-    out_file = output_file
-    splash.destroy()
 
 class Splash(tk.Toplevel):
     def __init__(self, parent):
@@ -72,6 +48,7 @@ class SpatialAudioApp:
         self.playing_output = False
         self.paused_output = False
         self.output_mixer_button_text = tk.StringVar(value="Play Output")
+        self.out_file = ''
         self.build_gui()
         
 
@@ -130,7 +107,7 @@ class SpatialAudioApp:
         splash = Splash(self.root)
         self.paused_output = False
         self.playing_output = False
-        threading.Thread(target=lambda: process_audio(self.audio, self.sr, self.dynamic.get(), 
+        threading.Thread(target=lambda: self.process_audio(self.audio, self.sr, self.dynamic.get(), 
                         self.mode.get(), self.fixed_azimuth.get(), f"results_{self.mode.get()}")).start()
     
 
@@ -150,7 +127,7 @@ class SpatialAudioApp:
             pygame.mixer.music.unload()
             self.run_simulation()
             # pygame loads only file objects?
-            pygame.mixer.music.load(out_file)
+            pygame.mixer.music.load(self.out_file)
             # pygame.mixer.music.get_pos()
             pygame.mixer.music.play()
         else:
@@ -161,12 +138,12 @@ class SpatialAudioApp:
             print("Load an audio file first!")
             return
         if not self.playing_output and not self.paused_output:
-            print("Now playing: ", out_file)
+            print("Now playing: ", self.out_file)
             self.paused_output = False
             self.output_mixer_button_text.set("Pause Output")
             pygame.mixer.music.pause()
             pygame.mixer.music.unload()
-            pygame.mixer.music.load(out_file)
+            pygame.mixer.music.load(self.out_file)
             pygame.mixer.music.play()
         elif self.playing_output and not self.paused_output:
             self.paused_output = True
@@ -177,6 +154,30 @@ class SpatialAudioApp:
             self.output_mixer_button_text.set("Pause Output")
             pygame.mixer.music.unpause()
         self.playing_output = not self.playing_output
+
+    def process_audio(self, audio, sr, dynamic, mode, source_angle_deg, output_file):
+        if not os.path.exists(output_file):
+            os.makedirs(output_file)
+        if mode == "headphones":
+            if dynamic:
+                output = dynamic_binaural.spatialize_audio_dynamic(audio, sr)
+            else:
+                output = static_binaural.spatialize_audio_static(audio, sr, source_angle_deg)
+        else:
+            print("Processing 5.0 Surround Audio...")
+            if dynamic:
+                output = vbap_dynamic_5_0.spatialize_audio_dynamic(audio, sr)
+            else:
+                output = vbap_static_5_0.spatialize_audio_static(audio, source_angle_deg)
+
+        if dynamic:
+            output_file = output_file+"/spatial_output_dynamic.wav"
+        else:
+            output_file = output_file+f"/spatial_output{source_angle_deg}.wav"
+        sf.write(output_file, output, sample_rate)
+        print(f"Audio saved: {output_file}")
+        self.out_file = output_file
+        splash.destroy()
         
 
 root = tk.Tk()
