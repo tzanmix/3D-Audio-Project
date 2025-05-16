@@ -15,7 +15,7 @@ def spatialize_audio_dynamic(audio, sr, block_size=1024):
         end = min((block_idx + 1) * block_size, n_samples)
         block = audio[start:end]
 
-        t = start / sr  # Time in seconds
+        t = start / sr
         angle = angle_function(t)
 
         gains, _ = vbap_implementation.vbap_2d_5_0(angle)
@@ -25,7 +25,7 @@ def spatialize_audio_dynamic(audio, sr, block_size=1024):
 
     return output_audio
 
-# pan from left to right across 5 seconds
+# pan from left to right - 30 seconds for the full motion
 def angle_function(t):
-    return -180 + 360 * (t / 10.0)
+    return -180 + 360 * (t / 30.0)
 

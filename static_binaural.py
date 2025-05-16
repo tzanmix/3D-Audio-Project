@@ -17,7 +17,7 @@ def find_nearest_hrir(target_az, target_el, positions):
     dists = np.linalg.norm(diffs, axis=1)
     return np.argmin(dists)
 
-def spatialize_audio_static(audio, sr, selected_azimuth):
+def spatialize_audio_static(audio, selected_azimuth):
     # gui azimuth selection ranges from -180 to 180 degrees
     # while sofa available azimuths from 0 to 360 degrees
     if selected_azimuth == -180:

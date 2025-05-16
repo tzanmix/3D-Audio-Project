@@ -33,8 +33,8 @@ class PieSlice:
         canvas.create_text(label_x, label_y, text=str(degree)+'°', fill='white', font=('Arial', 12, 'bold'))
 
     def on_hover(self, event):
-            if self.app_ref.selected_slice != self:
-                self.canvas.itemconfig(self.id, fill=self.highlight_color)
+        if self.app_ref.selected_slice != self:
+            self.canvas.itemconfig(self.id, fill=self.highlight_color)
 
     def on_leave(self, event):
         if self.app_ref.selected_slice != self:

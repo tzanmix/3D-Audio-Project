@@ -20,11 +20,18 @@ pygame.mixer.init()
 
 
 class Splash(tk.CTkToplevel):
-    def __init__(self, parent):
+    def __init__(self, parent, mode, dynamic):
+        self.mode = mode
+        self.dynamic = dynamic
         tk.CTkToplevel.__init__(self, parent)
         self.title("")
         self.geometry("300x150")
-        tk.CTkLabel(self, text="Please wait...").pack()
+        if self.dynamic:
+            self.dynamic = "dynamic"
+        else:
+            self.dynamic = "static"
+        # tk.CTkLabel(self, text="Please wait...").pack()
+        tk.CTkLabel(self, text="Processing "+self.dynamic +" audio for "+self.mode+"...").pack()
         progressbar = tk.CTkProgressBar(self, orientation="horizontal", mode="indeterminate", width=260)
         progressbar.pack(padx=20, pady=50)
         progressbar.start()
@@ -54,7 +61,7 @@ class SpatialAudioApp:
 
     def build_gui(self):
         self.root.title("Spatial Audio Simulator")
-        self.root.geometry("400x600")
+        self.root.geometry("400x650")
         tk.CTkLabel(self.root, text="Select Audio File:").pack()
         tk.CTkButton(self.root, text="Load Audio", command=self.load_audio).pack()
         tk.CTkLabel(self.root, textvariable=self.audio_file_loaded).pack()
@@ -63,14 +70,18 @@ class SpatialAudioApp:
         tk.CTkComboBox(self.root, variable=self.mode, values=["headphones", "speakers"]).pack()
 
         tk.CTkLabel(self.root, text="Motion:").pack()
-        tk.CTkCheckBox(self.root, text="Dynamic", variable=self.dynamic).pack()
+        tk.CTkRadioButton(self.root, text="Dynamic", variable=self.dynamic, value=True).pack()
+        tk.CTkRadioButton(self.root, text="Static", variable=self.dynamic, value=False).pack()
+        # tk.CTkCheckBox(self.root, text="Dynamic", variable=self.dynamic).pack()
         
         tk.CTkLabel(self.root, text="Fixed Azimuth (if Static):").pack()
 
         self.fixed_azimuth = tk.DoubleVar(value=0)
         azimuth_canvas.PieChartApp(self.root, label_var=self.fixed_azimuth)
-        tk.CTkButton(self.root, text="Save Audio", command=self.run_simulation).pack(pady=5)
+        tk.CTkButton(self.root, text="Process Audio", command=self.run_simulation).pack(pady=5)
         tk.CTkButton(self.root, textvariable=self.output_mixer_button_text, command=self.play_output).pack(pady=5)
+    
+    
 
     def load_audio(self):
         file_path = filedialog.askopenfilename(filetypes=[("Audio Files", "*.wav;*.mp3")])
@@ -102,7 +113,7 @@ class SpatialAudioApp:
             print("Load an audio file first!")
             return
         global splash
-        splash = Splash(self.root)
+        splash = Splash(self.root, self.mode.get(), self.dynamic.get())
         self.paused_output = False
         self.playing_output = False
         threading.Thread(target=lambda: self.process_audio(self.audio, self.sr, self.dynamic.get(), 
@@ -138,7 +149,7 @@ class SpatialAudioApp:
             if dynamic:
                 output = dynamic_binaural.spatialize_audio_dynamic(audio, sr)
             else:
-                output = static_binaural.spatialize_audio_static(audio, sr, source_angle_deg)
+                output = static_binaural.spatialize_audio_static(audio, source_angle_deg)
         else:
             print("Processing 5.0 Surround Audio...")
             if dynamic:
