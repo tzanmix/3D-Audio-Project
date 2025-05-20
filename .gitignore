@@ -3,3 +3,4 @@
 *.docx
 __pycache__
 D2_96K_24bit_512tap_FIR_SOFA.sofa
+*.tmp
