@@ -46,7 +46,7 @@ class SpatialAudioApp:
         self.audio = None
         self.mode = tk.StringVar(value = "headphones")
         self.play_button_symbol = tk.StringVar(value= "▶")
-        self.dynamic = tk.BooleanVar(value = True)
+        self.dynamic = tk.BooleanVar(value = False)
         self.fixed_azimuth = tk.DoubleVar(value = 0)
         self.audio_file_loaded = tk.StringVar(value= "No audio file selected")
         self.isPlaying = False
@@ -70,14 +70,14 @@ class SpatialAudioApp:
         tk.CTkComboBox(self.root, variable=self.mode, values=["headphones", "speakers"]).pack()
 
         tk.CTkLabel(self.root, text="Motion:").pack()
-        tk.CTkRadioButton(self.root, text="Dynamic", variable=self.dynamic, value=True).pack()
         tk.CTkRadioButton(self.root, text="Static", variable=self.dynamic, value=False).pack()
+        tk.CTkRadioButton(self.root, text="Dynamic", variable=self.dynamic, value=True).pack()
         # tk.CTkCheckBox(self.root, text="Dynamic", variable=self.dynamic).pack()
         
         tk.CTkLabel(self.root, text="Fixed Azimuth (if Static):").pack()
 
         self.fixed_azimuth = tk.DoubleVar(value=0)
-        azimuth_canvas.PieChartApp(self.root, label_var=self.fixed_azimuth)
+        azimuth_canvas.AzimuthSelectionApp(self.root, label_var=self.fixed_azimuth)
         tk.CTkButton(self.root, text="Process Audio", command=self.run_simulation).pack(pady=5)
         tk.CTkButton(self.root, textvariable=self.output_mixer_button_text, command=self.play_output).pack(pady=5)
     

@@ -46,7 +46,7 @@ class PieSlice:
     def unhighlight(self):
         self.canvas.itemconfig(self.id, fill=self.color)
 
-class PieChartApp:
+class AzimuthSelectionApp:
     def __init__(self, root, label_var, slices=24):
         self.root = root
         self.canvas = tk.Canvas(root, width=400, height=400, bg='white')
