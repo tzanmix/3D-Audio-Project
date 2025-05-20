@@ -16,7 +16,7 @@ import os
 block_size = 512
 sample_rate = 44100
 pygame.mixer.init()
-
+base_path = os.path.dirname(__file__)
 
 
 class Splash(tk.CTkToplevel):
@@ -32,9 +32,9 @@ class Splash(tk.CTkToplevel):
             self.dynamic = "static"
         # tk.CTkLabel(self, text="Please wait...").pack()
         tk.CTkLabel(self, text="Processing "+self.dynamic +" audio for "+self.mode+"...").pack()
-        progressbar = tk.CTkProgressBar(self, orientation="horizontal", mode="indeterminate", width=260)
-        progressbar.pack(padx=20, pady=50)
-        progressbar.start()
+        # progressbar = tk.CTkProgressBar(self, orientation="horizontal", mode="indeterminate", width=260)
+        # progressbar.pack(padx=20, pady=50)
+        # progressbar.start()
         self.grab_set()
 
 
@@ -143,6 +143,7 @@ class SpatialAudioApp:
         self.playing_output = not self.playing_output
 
     def process_audio(self, audio, sr, dynamic, mode, source_angle_deg, output_file):
+        output_file = os.path.join(base_path, output_file)
         if not os.path.exists(output_file):
             os.makedirs(output_file)
         if mode == "headphones":

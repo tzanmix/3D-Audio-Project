@@ -1,12 +1,14 @@
 import numpy as np
 import scipy.signal
-from scipy.signal import butter, sosfilt
 import pysofaconventions as sofa
+import os
+
 
 # Config with SOFA db
 target_elevation = 9
-sofa_file_path = "D2_96K_24bit_512tap_FIR_SOFA.sofa"
 
+base_path = os.path.dirname(__file__)
+sofa_file_path = os.path.join(base_path, "D2_96K_24bit_512tap_FIR_SOFA.sofa")
 sf_obj = sofa.SOFAFile(sofa_file_path, 'r')
 hrirs = sf_obj.getDataIR()
 positions = sf_obj.getVariableValue("SourcePosition")
