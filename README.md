@@ -18,7 +18,7 @@ Choose between speaker or headphone output.
 
 Select static or dynamic spatialization mode.
 
-Place and move the virtual sound source in a 3D environment.
+Place the virtual sound source in a 2D canvas.
 
 🎧 Headphone Mode
 
@@ -47,7 +47,7 @@ Simulates a 5.0 speaker configuration. Spatial audio output is generated using t
 
 Επιλογή λειτουργίας χωρικής απεικόνισης: στατική ή δυναμική.
 
-Τοποθέτηση και μετακίνηση της εικονικής ηχητικής πηγής σε 3D χώρο.
+Τοποθέτηση της εικονικής ηχητικής πηγής στο χώρο.
 
 🎧 Λειτουργία Ακουστικών
 
