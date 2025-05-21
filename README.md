@@ -1,24 +1,49 @@
-Digital Sound Processing Project
+📦 Digital Sound Processing Project
+This project is a simple Python-based software that allows users to place a virtual sound source in 3D space by clicking on a desired location. Audio can be rendered either through loudspeakers or headphones, and the software supports dynamic movement of the sound source.
 
-This is a simple software application written in Python that allows the user to place a virtual sound source in a 3D space by clicking on a desired location. The sound can be rendered either through loudspeakers or headphones, and the software supports dynamic motion of the sound source.
+🔧 Installation & Setup
+Unzip the project files into a folder of your choice.
 
-Installation & Setup:
-Unzip the files into a folder of your choice. Then, run the file setup.py to install all necessary dependencies. Finally, execute 3D AUDIO APP.py to launch the application.
+Run setup.py to install all necessary dependencies.
 
-Usage:
-The user can upload an MP3 or WAV audio file into the software, select the preferred output device (speakers or headphones), choose the desired spatialization mode (dynamic or static), and set the position of the sound source in the virtual environment.
-In headphone mode, binaural spatialization is achieved using a Head-Related Impulse Response (HRIR) algorithm, with data sourced from the SOFA repository.
-In speaker mode, the software simulates a 5.0 speaker setup, generating spatial audio output using the 2D Vector-Based Amplitude Panning (VBAP) algorithm.
+Launch the application by executing 3D AUDIO APP.py.
 
+🎵 Features
+Upload and play MP3 or WAV files.
 
-Εργασία Ψηφιακής Επεξεργασίας Ήχου
+Choose between speaker or headphone output.
 
-Πρόκειται για μία απλή εφαρμογή γραμμένη σε Python, η οποία επιτρέπει στον χρήστη να τοποθετεί μία εικονική πηγή ήχου σε έναν τρισδιάστατο χώρο, κάνοντας κλικ στο επιθυμητό σημείο. Ο ήχος μπορεί να αποδίδεται είτε μέσω ηχείων είτε μέσω ακουστικών, και υποστηρίζεται η δυναμική κίνηση της ηχητικής πηγής.
+Select static or dynamic spatialization mode.
 
-Εγκατάσταση:
-Αποσυμπιέστε τα αρχεία σε έναν φάκελο της επιλογής σας. Στη συνέχεια, εκτελέστε το αρχείο setup.py για την εγκατάσταση όλων των απαραίτητων εξαρτήσεων. Τέλος, εκτελέστε το 3D AUDIO APP.py για να ξεκινήσετε την εφαρμογή.
+Place and move the virtual sound source in a 3D environment.
 
-Χρήση:
-Ο χρήστης μπορεί να ανεβάσει ένα αρχείο ήχου τύπου MP3 ή WAV, να επιλέξει την προτιμώμενη έξοδο (ηχεία ή ακουστικά), τη λειτουργία χωρικής απεικόνισης (δυναμική ή στατική), καθώς και τη θέση της ηχητικής πηγής στον εικονικό χώρο.
-Στη λειτουργία ακουστικών, η χωρική απεικόνιση επιτυγχάνεται με τη χρήση Συναρτήσεων Μεταφορών Κεφαλής (HRTFs), χρησιμοποιώντας δεδομένα από το αποθετήριο SOFA.
-Στη λειτουργία ηχείων, προσομοιώνεται μία διάταξη ηχείων 5.0 και η έξοδος του ήχου παράγεται με τη βοήθεια του αλγορίθμου δισδιάστατου Vector Based Amplitude Panning (VBAP).
+🎧 Headphone Mode
+Implements binaural spatialization using Head-Related Impulse Responses (HRIRs), sourced from the SOFA repository. This simulates realistic 3D sound perception through headphones.
+
+🔊 Speaker Mode
+Simulates a 5.0 speaker configuration. Spatial audio output is generated using the 2D Vector-Based Amplitude Panning (VBAP) algorithm for immersive sound positioning.
+
+🇬🇷 Εργασία Ψηφιακής Επεξεργασίας Ήχου
+Αυτή η εφαρμογή, γραμμένη σε Python, επιτρέπει στον χρήστη να τοποθετεί μια εικονική πηγή ήχου σε τρισδιάστατο χώρο, κάνοντας κλικ στο επιθυμητό σημείο. Η απόδοση ήχου γίνεται μέσω ηχείων ή ακουστικών και υποστηρίζεται δυναμική κίνηση της ηχητικής πηγής.
+
+🔧 Εγκατάσταση & Ρύθμιση
+Αποσυμπιέστε τα αρχεία σε φάκελο της επιλογής σας.
+
+Εκτελέστε το setup.py για την εγκατάσταση των απαιτούμενων βιβλιοθηκών.
+
+Εκτελέστε το 3D AUDIO APP.py για να ξεκινήσετε την εφαρμογή.
+
+🎵 Λειτουργίες
+Φόρτωση και αναπαραγωγή αρχείων MP3 ή WAV.
+
+Επιλογή εξόδου: ηχεία ή ακουστικά.
+
+Επιλογή λειτουργίας χωρικής απεικόνισης: στατική ή δυναμική.
+
+Τοποθέτηση και μετακίνηση της εικονικής ηχητικής πηγής σε 3D χώρο.
+
+🎧 Λειτουργία Ακουστικών
+Υλοποιείται διώρυση χωρική απεικόνιση με χρήση HRIRs (Head-Related Impulse Responses) από το αποθετήριο SOFA, για ρεαλιστική ακουστική εμπειρία μέσω ακουστικών.
+
+🔊 Λειτουργία Ηχείων
+Προσομοιώνεται διάταξη 5.0 ηχείων και η έξοδος παράγεται με τον αλγόριθμο 2D VBAP (Vector-Based Amplitude Panning) για ρεαλιστική τοποθέτηση ήχου στον χώρο.
