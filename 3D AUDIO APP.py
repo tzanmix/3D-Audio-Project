@@ -25,16 +25,12 @@ class Splash(tk.CTkToplevel):
         self.dynamic = dynamic
         tk.CTkToplevel.__init__(self, parent)
         self.title("")
-        self.geometry("300x150")
+        self.geometry("300x100")
         if self.dynamic:
             self.dynamic = "dynamic"
         else:
             self.dynamic = "static"
-        # tk.CTkLabel(self, text="Please wait...").pack()
         tk.CTkLabel(self, text="Processing "+self.dynamic +" audio for "+self.mode+"...").pack()
-        # progressbar = tk.CTkProgressBar(self, orientation="horizontal", mode="indeterminate", width=260)
-        # progressbar.pack(padx=20, pady=50)
-        # progressbar.start()
         self.grab_set()
 
 
@@ -68,14 +64,10 @@ class SpatialAudioApp:
         tk.CTkButton(self.root, textvariable=self.play_button_symbol, command=self.play_audio).pack()
         tk.CTkLabel(self.root, text="Mode:").pack()
         tk.CTkComboBox(self.root, variable=self.mode, values=["headphones", "speakers"]).pack()
-
         tk.CTkLabel(self.root, text="Motion:").pack()
         tk.CTkRadioButton(self.root, text="Static", variable=self.dynamic, value=False).pack()
-        tk.CTkRadioButton(self.root, text="Dynamic", variable=self.dynamic, value=True).pack()
-        # tk.CTkCheckBox(self.root, text="Dynamic", variable=self.dynamic).pack()
-        
+        tk.CTkRadioButton(self.root, text="Dynamic", variable=self.dynamic, value=True).pack()        
         tk.CTkLabel(self.root, text="Fixed Azimuth (if Static):").pack()
-
         self.fixed_azimuth = tk.DoubleVar(value=0)
         azimuth_canvas.AzimuthSelectionApp(self.root, label_var=self.fixed_azimuth)
         tk.CTkButton(self.root, text="Process Audio", command=self.run_simulation).pack(pady=5)
